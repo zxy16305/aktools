@@ -15,6 +15,7 @@ import aktools
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 
 from aktools.core.api import app_core, templates
@@ -88,6 +89,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.include_router(app_core, prefix="/api", tags=["数据接口"])
 app.include_router(app_user_login, prefix="/auth", tags=["登录接口"])
