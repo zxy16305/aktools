@@ -21,4 +21,4 @@ COPY . /app
 WORKDIR /app/aktools
 
 # 默认启动 gunicorn 服务
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app", "-k", "uvicorn.workers.UvicornWorker"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app", "-k", "uvicorn.workers.UvicornWorker", "--http", "h2c"]
