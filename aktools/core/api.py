@@ -20,7 +20,6 @@ from aktools.datasets import get_pyscript_html, get_template_path
 from aktools.login.user_login import User, get_current_active_user
 
 app_core = APIRouter()
-app_ws = FastAPI()
 
 # 创建一个日志记录器
 logger = logging.getLogger(name='AKToolsLog')
@@ -219,7 +218,7 @@ def akscript():
     return generate_html_response()
 
 
-@app_ws.websocket("/ws/public")
+@app_core.websocket("/ws/public")
 async def websocket_public(websocket: WebSocket):
     await websocket.accept()
     try:
@@ -325,7 +324,7 @@ async def websocket_public(websocket: WebSocket):
     finally:
         await websocket.close()
 
-@app.websocket("/ws")
+@app_core.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     # 接受客户端的 WebSocket 连接
     print(f"Accepting WebSocket connection...")
