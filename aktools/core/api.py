@@ -23,7 +23,7 @@ app_core = APIRouter()
 
 # 创建一个日志记录器
 logger = logging.getLogger(name='AKToolsLog')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # 创建一个TimedRotatingFileHandler来进行日志轮转
 handler = TimedRotatingFileHandler(
