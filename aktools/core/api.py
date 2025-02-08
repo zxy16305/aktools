@@ -10,7 +10,7 @@ import urllib.parse
 from logging.handlers import TimedRotatingFileHandler
 
 import akshare as ak
-from fastapi import APIRouter
+from fastapi import APIRouter, WebSocket
 from fastapi import Depends, status
 from fastapi import Request
 from fastapi.responses import JSONResponse, HTMLResponse
