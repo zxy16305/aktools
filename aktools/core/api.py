@@ -324,7 +324,7 @@ async def websocket_public(websocket: WebSocket):
     finally:
         await websocket.close()
 
-@app.websocket("/ws")
+@app_core.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     # 接受客户端的 WebSocket 连接
     print(f"Accepting WebSocket connection...")
