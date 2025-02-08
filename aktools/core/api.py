@@ -245,7 +245,7 @@ async def handle_message(message, websocket):
                 "error": "缺少 item_id 参数"
             }
             await websocket.send_text(json.dumps(error_message))
-            continue
+            return
         interface_list = dir(ak)
         decode_params = urllib.parse.unquote(params_str)
         if item_id not in interface_list:
@@ -255,7 +255,7 @@ async def handle_message(message, websocket):
                 "error": "未找到该接口，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz"
             }
             await websocket.send_text(json.dumps(error_message))
-            continue
+            return
         if "cookie" in decode_params:
             eval_str = (
                     decode_params.split(sep="=", maxsplit=1)[0]
@@ -277,7 +277,7 @@ async def handle_message(message, websocket):
                         "error": "该接口返回数据为空，请确认参数是否正确：https://akshare.akfamily.xyz"
                     }
                     await websocket.send_text(json.dumps(error_message))
-                    continue
+                    return
                 temp_df = received_df.to_json(orient="records", date_format="iso")
             except KeyError as e:
                 logger.info(
@@ -287,7 +287,7 @@ async def handle_message(message, websocket):
                     "error": f"请输入正确的参数错误 {e}，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz"
                 }
                 await websocket.send_text(json.dumps(error_message))
-                continue
+                return
             logger.info(f"获取到 {item_id} 的数据")
             response = {
                 "messageId": message_id,
@@ -304,7 +304,7 @@ async def handle_message(message, websocket):
                         "error": "该接口返回数据为空，请确认参数是否正确：https://akshare.akfamily.xyz"
                     }
                     await websocket.send_text(json.dumps(error_message))
-                    continue
+                    return
                 temp_df = received_df.to_json(orient="records", date_format="iso")
             except KeyError as e:
                 logger.info(
@@ -314,7 +314,7 @@ async def handle_message(message, websocket):
                     "error": f"请输入正确的参数错误 {e}，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz"
                 }
                 await websocket.send_text(json.dumps(error_message))
-                continue
+                return
             logger.info(f"获取到 {item_id} 的数据")
             response = {
                 "messageId": message_id,
