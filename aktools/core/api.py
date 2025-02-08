@@ -323,3 +323,24 @@ async def websocket_public(websocket: WebSocket):
         logger.error(f"WebSocket 通信出现错误: {e}")
     finally:
         await websocket.close()
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    # 接受客户端的 WebSocket 连接
+    print(f"Accepting WebSocket connection...")
+    await websocket.accept()
+    try:
+        while True:
+            # 接收客户端发送的消息
+            data = await websocket.receive_text()
+            if data.lower() == "ping":
+                # 如果接收到的消息是 "ping"，则发送 "pong" 作为响应
+                await websocket.send_text("pong")
+            else:
+                # 对于其他消息，发送提示信息
+                await websocket.send_text("Please send 'ping' to get a 'pong' response.")
+    except Exception as e:
+        print(f"WebSocket connection closed: {e}")
+    finally:
+        # 关闭 WebSocket 连接
+        await websocket.close()
