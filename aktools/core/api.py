@@ -10,7 +10,7 @@ import urllib.parse
 from logging.handlers import TimedRotatingFileHandler
 
 import akshare as ak
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, FastAPI
 from fastapi import Depends, status
 from fastapi import Request
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -19,7 +19,7 @@ from fastapi.templating import Jinja2Templates
 from aktools.datasets import get_pyscript_html, get_template_path
 from aktools.login.user_login import User, get_current_active_user
 
-app_core = APIRouter()
+app_core = FastAPI()
 
 # 创建一个日志记录器
 logger = logging.getLogger(name='AKToolsLog')
