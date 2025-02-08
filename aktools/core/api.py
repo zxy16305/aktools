@@ -221,12 +221,17 @@ def akscript():
 
 @app_core.websocket("/ws/public")
 async def websocket_public(websocket: WebSocket):
+    semaphore = asyncio.Semaphore(2)
     await websocket.accept()
     try:
+        async def handle_message_with_semaphore(message, websocket):
+            async with semaphore:
+                handle_message(message, websocket)
+
         while True:
             # 接收客户端发送的消息
             message = await websocket.receive_text()
-            await handle_message(message, websocket)
+            asyncio.create_task(handle_message_with_semaphore(message, websocket))
     except Exception as e:
         logger.error(f"WebSocket 通信出现错误: {e}")
     finally:
