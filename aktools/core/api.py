@@ -218,7 +218,7 @@ def akscript():
     return generate_html_response()
 
 
-@app.websocket("/ws/public")
+@app_core.websocket("/ws/public")
 async def websocket_public(websocket: WebSocket):
     await websocket.accept()
     try:
