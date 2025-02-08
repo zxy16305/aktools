@@ -23,4 +23,4 @@ WORKDIR /app/aktools
 
 # 默认启动 gunicorn 服务
 #CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app", "-k", "uvicorn.workers.UvicornWorker", "--log-level", "debug"]
-CMD ["hypercorn", "main:app", "--bind", "0.0.0.0:8080", "--keep-alive", "30", "--http", "h2c"]
+CMD ["hypercorn", "main:app", "--bind", "0.0.0.0:8080", "--keep-alive", "30"]
