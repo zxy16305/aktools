@@ -226,7 +226,7 @@ async def websocket_public(websocket: WebSocket):
         while True:
             # 接收客户端发送的消息
             message = await websocket.receive_text()
-            asyncio.create_task(handle_message(message, websocket))
+            await handle_message(message, websocket)
     except Exception as e:
         logger.error(f"WebSocket 通信出现错误: {e}")
     finally:
