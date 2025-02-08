@@ -19,7 +19,8 @@ from fastapi.templating import Jinja2Templates
 from aktools.datasets import get_pyscript_html, get_template_path
 from aktools.login.user_login import User, get_current_active_user
 
-app_core = FastAPI()
+app_core = APIRouter()
+app_ws = FastAPI()
 
 # 创建一个日志记录器
 logger = logging.getLogger(name='AKToolsLog')
@@ -218,7 +219,7 @@ def akscript():
     return generate_html_response()
 
 
-@app_core.websocket("/ws/public")
+@app_ws.websocket("/ws/public")
 async def websocket_public(websocket: WebSocket):
     await websocket.accept()
     try:
@@ -322,25 +323,4 @@ async def websocket_public(websocket: WebSocket):
     except Exception as e:
         logger.error(f"WebSocket 通信出现错误: {e}")
     finally:
-        await websocket.close()
-
-@app_core.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    # 接受客户端的 WebSocket 连接
-    print(f"Accepting WebSocket connection...")
-    await websocket.accept()
-    try:
-        while True:
-            # 接收客户端发送的消息
-            data = await websocket.receive_text()
-            if data.lower() == "ping":
-                # 如果接收到的消息是 "ping"，则发送 "pong" 作为响应
-                await websocket.send_text("pong")
-            else:
-                # 对于其他消息，发送提示信息
-                await websocket.send_text("Please send 'ping' to get a 'pong' response.")
-    except Exception as e:
-        print(f"WebSocket connection closed: {e}")
-    finally:
-        # 关闭 WebSocket 连接
         await websocket.close()

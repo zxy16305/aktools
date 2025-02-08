@@ -13,7 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import akshare
 import aktools
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
@@ -94,6 +94,27 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.include_router(app_core, prefix="/api", tags=["数据接口"])
 app.include_router(app_user_login, prefix="/auth", tags=["登录接口"])
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    # 接受客户端的 WebSocket 连接
+    print(f"Accepting WebSocket connection...")
+    await websocket.accept()
+    try:
+        while True:
+            # 接收客户端发送的消息
+            data = await websocket.receive_text()
+            if data.lower() == "ping":
+                # 如果接收到的消息是 "ping"，则发送 "pong" 作为响应
+                await websocket.send_text("pong")
+            else:
+                # 对于其他消息，发送提示信息
+                await websocket.send_text("Please send 'ping' to get a 'pong' response.")
+    except Exception as e:
+        print(f"WebSocket connection closed: {e}")
+    finally:
+        # 关闭 WebSocket 连接
+        await websocket.close()
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app", host="127.0.0.1", port=8080)
