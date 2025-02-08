@@ -226,7 +226,7 @@ async def websocket_public(websocket: WebSocket):
     try:
         async def handle_message_with_semaphore(message, websocket):
             async with semaphore:
-                handle_message(message, websocket)
+                await handle_message(message, websocket)
 
         while True:
             # 接收客户端发送的消息
