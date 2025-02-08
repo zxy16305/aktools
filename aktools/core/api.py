@@ -216,3 +216,110 @@ def akscript_temp(request: Request, interface: str):
 )
 def akscript():
     return generate_html_response()
+
+
+@app.websocket("/ws/public")
+async def websocket_public(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            # 接收客户端发送的消息
+            message = await websocket.receive_text()
+            try:
+                # 解析客户端消息，期望消息是包含 messageId、item_id 和 params 的 JSON
+                data = json.loads(message)
+                message_id = data.get("messageId")
+                item_id = data.get("item_id")
+                params_str = data.get("params", "")
+                if not item_id:
+                    error_message = {
+                        "messageId": message_id,
+                        "error": "缺少 item_id 参数"
+                    }
+                    await websocket.send_text(json.dumps(error_message))
+                    continue
+                interface_list = dir(ak)
+                decode_params = urllib.parse.unquote(params_str)
+                if item_id not in interface_list:
+                    logger.info("未找到该接口，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz")
+                    error_message = {
+                        "messageId": message_id,
+                        "error": "未找到该接口，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz"
+                    }
+                    await websocket.send_text(json.dumps(error_message))
+                    continue
+                if "cookie" in decode_params:
+                    eval_str = (
+                            decode_params.split(sep="=", maxsplit=1)[0]
+                            + "='"
+                            + decode_params.split(sep="=", maxsplit=1)[1]
+                            + "'"
+                    )
+                    eval_str = eval_str.replace("+", " ")
+                else:
+                    eval_str = decode_params.replace("&", '", ').replace("=", '="') + '"'
+                    eval_str = eval_str.replace("+", " ")  # 处理传递的参数中带空格的情况
+                if not bool(params_str):
+                    try:
+                        received_df = eval("ak." + item_id + "()")
+                        if received_df is None:
+                            logger.info("该接口返回数据为空，请确认参数是否正确：https://akshare.akfamily.xyz")
+                            error_message = {
+                                "messageId": message_id,
+                                "error": "该接口返回数据为空，请确认参数是否正确：https://akshare.akfamily.xyz"
+                            }
+                            await websocket.send_text(json.dumps(error_message))
+                            continue
+                        temp_df = received_df.to_json(orient="records", date_format="iso")
+                    except KeyError as e:
+                        logger.info(
+                            f"请输入正确的参数错误 {e}，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz")
+                        error_message = {
+                            "messageId": message_id,
+                            "error": f"请输入正确的参数错误 {e}，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz"
+                        }
+                        await websocket.send_text(json.dumps(error_message))
+                        continue
+                    logger.info(f"获取到 {item_id} 的数据")
+                    response = {
+                        "messageId": message_id,
+                        "data": json.loads(temp_df)
+                    }
+                    await websocket.send_text(json.dumps(response))
+                else:
+                    try:
+                        received_df = eval("ak." + item_id + f"({eval_str})")
+                        if received_df is None:
+                            logger.info("该接口返回数据为空，请确认参数是否正确：https://akshare.akfamily.xyz")
+                            error_message = {
+                                "messageId": message_id,
+                                "error": "该接口返回数据为空，请确认参数是否正确：https://akshare.akfamily.xyz"
+                            }
+                            await websocket.send_text(json.dumps(error_message))
+                            continue
+                        temp_df = received_df.to_json(orient="records", date_format="iso")
+                    except KeyError as e:
+                        logger.info(
+                            f"请输入正确的参数错误 {e}，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz")
+                        error_message = {
+                            "messageId": message_id,
+                            "error": f"请输入正确的参数错误 {e}，请升级 AKShare 到最新版本并在文档中确认该接口的使用方式：https://akshare.akfamily.xyz"
+                        }
+                        await websocket.send_text(json.dumps(error_message))
+                        continue
+                    logger.info(f"获取到 {item_id} 的数据")
+                    response = {
+                        "messageId": message_id,
+                        "data": json.loads(temp_df)
+                    }
+                    await websocket.send_text(json.dumps(response))
+            except json.JSONDecodeError:
+                error_message = {
+                    "messageId": None,
+                    "error": "接收到的消息不是有效的 JSON 格式"
+                }
+                await websocket.send_text(json.dumps(error_message))
+    except Exception as e:
+        logger.error(f"WebSocket 通信出现错误: {e}")
+    finally:
+        await websocket.close()
